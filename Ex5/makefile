@@ -25,4 +25,4 @@ run:
 	$(JAVA) -classpath $(CLASSPATH) parser
 
 test:
-	$(JAVA) -classpath $(CLASSPATH) parser < Sample.in
+	$(JAVAC) -classpath $(CLASSPATH) AP.java && java AP
