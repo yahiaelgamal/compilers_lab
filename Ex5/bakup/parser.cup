@@ -1,0 +1,45 @@
+
+import java_cup.runtime.*;
+	
+/* Terminals (tokens returned by the scanner). */
+terminal			SM, AO, ID, NM;
+
+/* Non-terminals */
+nonterminal	Boolean		program, statement;
+
+
+
+
+/* The grammar */
+
+program ::= program:p statement:e SM
+			  {:RESULT = p && e;:} 
+			  |  {:RESULT = true;:};
+statement ::= ID AO NM
+			  {:RESULT = true;:}
+			  | error 
+			  {:RESULT = false;:};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
