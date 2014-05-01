@@ -20,6 +20,9 @@ import java_cup.runtime.Symbol;
 %state MLCOMMENTS
 %state STRING
 
+MODIF = public|private|protected|static
+TYPE = int|double|boolean|long|short|String|void|byte|char
+ 
 KEYWORD=String|System|boolean|break|byte|char|class|double|false|for|if|int|long|new|out|println|public|return|short|static|true|void|while
 
 ALPHA=[A-Za-z_]
@@ -97,11 +100,11 @@ STRING=\"(.*|\\\")\"
 }
 
 <YYINITIAL> "(" {
-  return new Symbol(sym.LB, yytext());
+  return new Symbol(sym.LP, yytext());
 }
 
 <YYINITIAL> ")" {
-  return new Symbol(sym.RB, yytext());
+  return new Symbol(sym.RP, yytext());
 }
 
 <YYINITIAL> "[]" {
@@ -182,7 +185,7 @@ STRING=\"(.*|\\\")\"
 }
 
 <YYINITIAL> "," {
-  return new Symbol(sym.FA, yytext());
+  return new Symbol(sym.COMMA, yytext());
 }
 
 
@@ -196,6 +199,14 @@ STRING=\"(.*|\\\")\"
 
 <YYINITIAL> "&" {
   return new Symbol(sym.LA, yytext());
+}
+
+<YYINITIAL> {TYPE}  {
+  return new Symbol(sym.TYPE, yytext());
+}
+
+<YYINITIAL> {MODIF}  {
+  return new Symbol(sym.MODIF, yytext());
 }
 
 <YYINITIAL> {KEYWORD}  {

@@ -1,1 +1,6 @@
-class yahia {}
+class yahia {
+  public static double coolMethod(int s, double y){
+
+  }
+  public static double coolMethod2(String sasdfasdf, double y){}
+}

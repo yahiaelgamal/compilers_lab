@@ -10,28 +10,32 @@ parser code {:
 :}
     
 /* Terminals (tokens returned by the scanner). */
-terminal        CLASS,ST,CH,NM,DO,LB,RB,AA,MM,PP,GE,NE,LE,EQ,LO,LN,LS,RS,LC,RC,AO,PO,MO,MB,DB,SM,FA,LT,RT,LA,KW,ID,UNDEFINED;
+terminal        TYPE,MODIF,CLASS,ST,CH,NM,DO,LP,RP,AA,MM,PP,GE,NE,LE,EQ,LO,LN,LS,RS,LC,RC,AO,PO,MO,MB,DB,SM,COMMA,LT,RT,LA,KW,ID,UNDEFINED;
     
 
 /* Non-terminals */
-nonterminal Boolean     program, statement, class_decl;
+nonterminal Boolean program, statement, class_decl, class_body_decls, class_body_decl;
+nonterminal Boolean type_args, type_arg, block;
 
 
 
 
 /* The grammar */
 
-/*
 program ::= CLASS ID class_decl
               {:RESULT = true;:}
               | error 
               {:RESULT = false;:};
 
-class_decl  ::= LC RC
-    ;
-*/
-program ::= CLASS ID class_decl
-              {:RESULT = true;:}
-              | error 
-              {:RESULT = false;:};
-class_decl  ::= LC RC;
+
+class_decl  ::= LC class_body_decls RC;
+class_body_decls ::= class_body_decl
+              | class_body_decls class_body_decl;
+
+class_body_decl ::= MODIF MODIF TYPE ID LP type_args RP block;
+
+
+type_arg ::= TYPE ID;
+type_args ::= type_arg | type_args COMMA type_arg;
+
+block ::= LC RC;
