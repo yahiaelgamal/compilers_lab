@@ -1,6 +1,10 @@
 class yahia {
   public static double coolMethod(int s, double y){
-
+    int[] s = 2;
+    int y = 4;
+    y = 2;
+    System.out.println("asdfasdf");
+    y = 2 + 2  + 3 + 2;
   }
   public static double coolMethod2(String sasdfasdf, double y){}
 }

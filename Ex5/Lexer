@@ -35,6 +35,7 @@ CHARACTER=\'(.|\\.)\'
 NUMBER={DIGIT}+
 F_NUMBER={NUMBER}\.{NUMBER}(E{NUMBER})?
 STRING=\"(.*|\\\")\"
+SYSOUT=System\.out\.println
 %%
 
 <YYINITIAL> "//" {
@@ -44,6 +45,10 @@ STRING=\"(.*|\\\")\"
 }
 <COMMENTS> [\n] {
   yybegin(YYINITIAL);
+}
+
+<YYINITIAL> {SYSOUT} {
+  return new Symbol(sym.SYSOUT, yytext());
 }
 
 <YYINITIAL> "/*" {
@@ -135,6 +140,11 @@ STRING=\"(.*|\\\")\"
   return new Symbol(sym.EQ, yytext());
 }
 
+<YYINITIAL> "||" {
+  return new Symbol(sym.LOLO, yytext());
+}
+
+
 <YYINITIAL> "|" {
   return new Symbol(sym.LO, yytext());
 }
@@ -197,6 +207,10 @@ STRING=\"(.*|\\\")\"
   return new Symbol(sym.RT, yytext());
 }
 
+<YYINITIAL> "&&" {
+  return new Symbol(sym.LALA, yytext());
+}
+
 <YYINITIAL> "&" {
   return new Symbol(sym.LA, yytext());
 }
@@ -207,6 +221,18 @@ STRING=\"(.*|\\\")\"
 
 <YYINITIAL> {MODIF}  {
   return new Symbol(sym.MODIF, yytext());
+}
+
+<YYINITIAL> 'if'  {
+  return new Symbol(sym.IF, yytext());
+}
+
+<YYINITIAL> 'while'  {
+  return new Symbol(sym.WHILE, yytext());
+}
+
+<YYINITIAL> 'for'  {
+  return new Symbol(sym.FOR, yytext());
 }
 
 <YYINITIAL> {KEYWORD}  {

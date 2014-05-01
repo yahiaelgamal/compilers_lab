@@ -20,8 +20,8 @@ public class AP {
 			BufferedInputStream bis = new BufferedInputStream(fis);
 			DataInputStream dis = new DataInputStream(bis);
 	
-			parser parser = new parser(new Lexer(dis));
-			Symbol res = parser.parse();
+			parser p = new parser(new Lexer(dis));
+			Symbol res = p.parse();
 			boolean value = ((Boolean)res.value).booleanValue();
 			
 			if(value)
