@@ -1,6 +1,11 @@
 
 import java_cup.runtime.*;
 import java.util.*;
+/*
+ * Tutorial T8
+ * 19-1023, Yahia El Gamal
+ * 19-2162, Adam Ghanem
+ */
 
 parser code {:
     /* this part is included in the parser class */
