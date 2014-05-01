@@ -223,16 +223,36 @@ SYSOUT=System\.out\.println
   return new Symbol(sym.MODIF, yytext());
 }
 
-<YYINITIAL> 'if'  {
+<YYINITIAL> "if"  {
   return new Symbol(sym.IF, yytext());
 }
 
-<YYINITIAL> 'while'  {
+<YYINITIAL> "while"  {
   return new Symbol(sym.WHILE, yytext());
 }
 
-<YYINITIAL> 'for'  {
+<YYINITIAL> "for"  {
   return new Symbol(sym.FOR, yytext());
+}
+
+<YYINITIAL> "new"  {
+  return new Symbol(sym.NEW, yytext());
+}
+
+<YYINITIAL> "true"  {
+  return new Symbol(sym.TRUE, yytext());
+}
+
+<YYINITIAL> "false"  {
+  return new Symbol(sym.FALSE, yytext());
+}
+
+<YYINITIAL> "break"  {
+  return new Symbol(sym.BREAK, yytext());
+}
+
+<YYINITIAL> "return"  {
+  return new Symbol(sym.RETURN, yytext());
 }
 
 <YYINITIAL> {KEYWORD}  {
