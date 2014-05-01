@@ -10,7 +10,7 @@ parser code {:
 :}
 	
 /* Terminals (tokens returned by the scanner). */
-terminal			SM, AO, ID, NM;
+terminal			SM, AO, ID, NM, CLASS;
 
 /* Non-terminals */
 nonterminal	Boolean		program, statement;
@@ -20,14 +20,7 @@ nonterminal	Boolean		program, statement;
 
 /* The grammar */
 
-program ::= program:p statement:e SM
-			  {:RESULT = p && e;:} 
-			  |  {:RESULT = true;:};
-statement ::= ID AO NM
+program ::= CLASS ID
 			  {:RESULT = true;:}
 			  | error 
 			  {:RESULT = false;:};
-
-
-
-
