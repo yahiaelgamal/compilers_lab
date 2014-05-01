@@ -48,7 +48,7 @@ block_statement ::= semi_column_statement SM | if_block | while_block | for_bloc
 block_statements ::= block_statement | block_statements block_statement;
 
 left_hand_side ::= TYPE AA ID | ID LS operation RS | TYPE ID | ID;
-semi_column_statement ::= left_hand_side AO expression | SYSOUT LP atom RP | BREAK | RETURN expression; 
+semi_column_statement ::= left_hand_side AO expression | SYSOUT LP atom RP | SYSOUT LP RP | BREAK | RETURN expression; 
 
 if_block ::= IF LP expression RP block;
 while_block ::= WHILE LP expression RP block;

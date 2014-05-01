@@ -16,6 +16,7 @@ class yahia {
       T3[T3Count] = T3[T3Count] +  "%"  ;
       break;
     }
+    System.out.println();
     return TO[2];
   }
   public static double coolMethod2(String sasdfasdf, double y){}
