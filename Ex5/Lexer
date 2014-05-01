@@ -10,38 +10,206 @@ import java_cup.runtime.Symbol;
 	return new Symbol(sym.EOF, null);
 %eofval}
 
+%{
+  public String temp = "";
+%}
+
+%line
+%char
+%state COMMENTS
+%state MLCOMMENTS
+%state STRING
+
+KEYWORD=String|System|boolean|break|byte|char|class|double|false|for|if|int|long|new|out|println|public|return|short|static|true|void|while
+
+ALPHA=[A-Za-z_]
 DIGIT=[0-9]
-ALPHA=[a-zA-z]
-NUMBER=({DIGIT})+([.]({DIGIT})+)?
-IDENTIFIER=({ALPHA})+
+ALPHA_NUMERIC={ALPHA}|{DIGIT}
 WHITE_SPACE=([\ \n\r\t\f\b])+
+COMMENTS=//[^\n]* \n
+ID={ALPHA}({ALPHA_NUMERIC})*
+CHARACTER=\'(.|\\.)\'
+NUMBER={DIGIT}+
+F_NUMBER={NUMBER}\.{NUMBER}(E{NUMBER})?
+STRING=\"(.*|\\\")\"
 %%
 
-
-<YYINITIAL> "class" {
-	return new Symbol(sym.CLASS, yytext());
+<YYINITIAL> "//" {
+  yybegin(COMMENTS);
+}
+<COMMENTS> [^\n] {
+}
+<COMMENTS> [\n] {
+  yybegin(YYINITIAL);
 }
 
+<YYINITIAL> "/*" {
+  yybegin(MLCOMMENTS);
+}
+
+<MLCOMMENTS> "*/" {
+  yybegin(YYINITIAL);
+}
+
+<MLCOMMENTS> (.|\n) {
+}
+
+<YYINITIAL> "\"" {
+  temp = "\"";
+  yybegin(STRING);
+}
+
+<STRING> "\\\"" {
+  temp += "\\\"";
+}
+
+<STRING> [^\"] {
+  temp += yytext();
+}
+
+<STRING> "\"" {
+  temp += "\"";
+  yybegin(YYINITIAL);
+  return new Symbol(sym.ST, temp);
+}
+
+<YYINITIAL> "class" {
+  return new Symbol(sym.CLASS, yytext());
+}
+
+<YYINITIAL> {CHARACTER} {
+  return new Symbol(sym.CH, yytext());
+
+}
+
+<YYINITIAL> {NUMBER} {
+  return new Symbol(sym.NM, yytext());
+}
+
+<YYINITIAL> {F_NUMBER} {
+  return new Symbol(sym.NM, yytext());
+}
 
 <YYINITIAL> {WHITE_SPACE} { }
 
-<YYINITIAL> {NUMBER} { 
-	return new Symbol(sym.NM, yytext());
+<YYINITIAL> "." {
+  return new Symbol(sym.DO, yytext());
 }
 
-<YYINITIAL> {IDENTIFIER} { 
-	return new Symbol(sym.ID, yytext());
+<YYINITIAL> "(" {
+  return new Symbol(sym.LB, yytext());
 }
 
-<YYINITIAL> ";" { 
-	return new Symbol(sym.SM, yytext());
+<YYINITIAL> ")" {
+  return new Symbol(sym.RB, yytext());
 }
 
-<YYINITIAL> "=" { 
-	return new Symbol(sym.AO, yytext());
+<YYINITIAL> "[]" {
+  return new Symbol(sym.AA, yytext());
 }
 
+<YYINITIAL> "--" {
+  return new Symbol(sym.MM, yytext());
+}
+
+<YYINITIAL> "++" {
+  return new Symbol(sym.PP, yytext());
+}
+
+<YYINITIAL> ">=" {
+  return new Symbol(sym.GE, yytext());
+}
+
+<YYINITIAL> "!=" {
+  return new Symbol(sym.NE, yytext());
+}
+
+<YYINITIAL> "<=" {
+  return new Symbol(sym.LE, yytext());
+}
+
+<YYINITIAL> "==" {
+  return new Symbol(sym.EQ, yytext());
+}
+
+<YYINITIAL> "|" {
+  return new Symbol(sym.LO, yytext());
+}
+
+<YYINITIAL> "!" {
+  return new Symbol(sym.LN, yytext());
+}
+
+<YYINITIAL> "[" {
+  return new Symbol(sym.LS, yytext());
+}
+
+<YYINITIAL> "]" {
+  return new Symbol(sym.RS, yytext());
+}
+
+<YYINITIAL> "{" {
+  return new Symbol(sym.LC, yytext());
+}
+
+<YYINITIAL> "}" {
+  return new Symbol(sym.RC, yytext());
+}
+
+<YYINITIAL> "=" {
+  return new Symbol(sym.AO, yytext());
+}
+
+<YYINITIAL> "+" {
+  return new Symbol(sym.PO, yytext());
+}
+
+<YYINITIAL> "-" {
+  return new Symbol(sym.MO, yytext());
+}
+
+<YYINITIAL> "*" {
+  return new Symbol(sym.MB, yytext());
+}
+
+<YYINITIAL> "/" {
+  return new Symbol(sym.DB, yytext());
+}
+
+
+<YYINITIAL> ";" {
+  return new Symbol(sym.SM, yytext());
+}
+
+<YYINITIAL> "," {
+  return new Symbol(sym.FA, yytext());
+}
+
+
+<YYINITIAL> "<" {
+  return new Symbol(sym.LT, yytext());
+}
+
+<YYINITIAL> ">" {
+  return new Symbol(sym.RT, yytext());
+}
+
+<YYINITIAL> "&" {
+  return new Symbol(sym.LA, yytext());
+}
+
+<YYINITIAL> {KEYWORD}  {
+  return new Symbol(sym.KW, yytext());
+}
+
+<YYINITIAL> "'\\\"'"  {
+  return new Symbol(sym.CH, yytext());
+}
+
+<YYINITIAL> {ID}  {
+  return new Symbol(sym.ID, yytext());
+}
 
 <YYINITIAL> . {
-	return new Symbol(sym.error, "Error!");
+  return new Symbol(sym.UNDEFINED, yytext());
 }

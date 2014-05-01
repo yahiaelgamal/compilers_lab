@@ -3,24 +3,35 @@ import java_cup.runtime.*;
 import java.util.*;
 
 parser code {:
-	/* this part is included in the parser class */
-	public static void main (String args[]) throws Exception{
-		new parser(new Lexer(System.in)).parse();
-	}
+    /* this part is included in the parser class */
+    public static void main (String args[]) throws Exception{
+        new parser(new Lexer(System.in)).parse();
+    }
 :}
-	
+    
 /* Terminals (tokens returned by the scanner). */
-terminal			SM, AO, ID, NM, CLASS;
+terminal        CLASS,ST,CH,NM,DO,LB,RB,AA,MM,PP,GE,NE,LE,EQ,LO,LN,LS,RS,LC,RC,AO,PO,MO,MB,DB,SM,FA,LT,RT,LA,KW,ID,UNDEFINED;
+    
 
 /* Non-terminals */
-nonterminal	Boolean		program, statement;
+nonterminal Boolean     program, statement, class_decl;
 
 
 
 
 /* The grammar */
 
-program ::= CLASS ID
-			  {:RESULT = true;:}
-			  | error 
-			  {:RESULT = false;:};
+/*
+program ::= CLASS ID class_decl
+              {:RESULT = true;:}
+              | error 
+              {:RESULT = false;:};
+
+class_decl  ::= LC RC
+    ;
+*/
+program ::= CLASS ID class_decl
+              {:RESULT = true;:}
+              | error 
+              {:RESULT = false;:};
+class_decl  ::= LC RC;
