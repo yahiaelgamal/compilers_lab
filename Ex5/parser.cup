@@ -39,7 +39,8 @@ class_decl  ::= LC class_body_decls RC;
 class_body_decls ::= class_body_decl
               | class_body_decls class_body_decl;
 
-class_body_decl ::= MODIF MODIF TYPE ID LP type_args RP block; 
+class_body_decl ::= MODIF MODIF TYPE ID LP type_args RP block | 
+                    MODIF MODIF TYPE ID LP RP block; 
 type_arg ::= TYPE ID;
 type_args ::= type_arg | type_args COMMA type_arg;
 
@@ -48,7 +49,7 @@ block_statement ::= semi_column_statement SM | if_block | while_block | for_bloc
 block_statements ::= block_statement | block_statements block_statement;
 
 left_hand_side ::= TYPE AA ID | ID LS operation RS | TYPE ID | ID;
-semi_column_statement ::= left_hand_side AO expression | SYSOUT LP atom RP | SYSOUT LP RP | BREAK | RETURN expression; 
+semi_column_statement ::= left_hand_side AO expression | SYSOUT LP expression RP | SYSOUT LP RP | BREAK | RETURN expression; 
 
 if_block ::= IF LP expression RP block;
 while_block ::= WHILE LP expression RP block;
