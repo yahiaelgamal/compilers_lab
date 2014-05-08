@@ -1,5 +1,14 @@
 class yahia {
   public static double coolMethod(int s, double y){
+    int x = 2;
+    int y = (int) 2 + 2;
+    if (x == 3){
+      s =3;
+    }
+    while(x < 3){
+      s =4;
+    }
+
     int[] s = 2;
     int y = 4;
     y = 2;
