@@ -9,6 +9,7 @@ public class AP {
 
 	public static void main(String[] args) {
 		
+        String DESC = "";
 		String inFile = "Sample.in";
 
 		if (args.length > 1) {
@@ -32,6 +33,7 @@ public class AP {
 			fis.close();
 			bis.close();
 			dis.close();
+            System.out.println(parser.desc);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

@@ -9,6 +9,11 @@ import java.util.*;
 
 parser code {:
     /* this part is included in the parser class */
+    static String desc = "";
+    public static void describe(String s){
+      desc = s + "\n" + desc;
+      /*desc += s + "\n";*/
+    }
     public static void main (String args[]) throws Exception{
         new parser(new Lexer(System.in)).parse();
     }
@@ -19,42 +24,58 @@ terminal RETURN,BREAK,TRUE,FALSE,NEW,SYSOUT,LALA,LOLO,IF,WHILE,FOR,TYPE,MODIF,CL
 
 
 /* Non-terminals */
-nonterminal Boolean program, statement, class_decl, class_body_decls, class_body_decl;
-nonterminal Boolean type_args, type_arg;
-nonterminal Boolean block, block_statements, block_statement;
+nonterminal Boolean program; 
+nonterminal String statement, class_decl, class_body_decls, class_body_decl;
+nonterminal String type_args, type_arg;
+nonterminal String block, block_statements, block_statement;
 
-nonterminal Boolean semi_column_statement, if_block, while_block, for_block;
-nonterminal Boolean left_hand_side, expression;
-nonterminal Boolean type_cast, initiate, array;
-nonterminal Boolean operation, operations, operator, atom, atoms;
-nonterminal Boolean object;
+nonterminal String semi_column_statement, if_block, while_block, for_block;
+nonterminal String left_hand_side, expression;
+nonterminal String type_cast, initiate, array;
+nonterminal String operation, operations, operator, atom, atoms;
+nonterminal String object;
 
 
 
 
 /* The grammar */
 
-program ::= CLASS ID class_decl
-              {:RESULT = true;:}
-              | error 
-              {:RESULT = false;:};
+
+program ::= CLASS ID:name class_decl:desc
+              {:RESULT = true; parser.describe("declaring class " + name + "\n" + desc);:}
+              | error
+              {:RESULT = false; parser.describe("not cool bro");:};
 
 
-class_decl  ::= LC class_body_decls RC;
-class_body_decls ::= class_body_decl
-              | class_body_decls class_body_decl;
+class_decl ::= LC class_body_decls:desc RC {:RESULT = desc + "\n";:};
+class_body_decls ::= class_body_decl:desc {:RESULT = desc + "\n";:}
+              | class_body_decls:desc1 class_body_decl:desc2 {:RESULT = desc1 + desc2 + "\n";:};
 
-class_body_decl ::= MODIF MODIF TYPE ID LP type_args RP block | 
-                    MODIF MODIF TYPE ID LP RP block; 
-type_arg ::= TYPE ID;
-type_args ::= type_arg | type_args COMMA type_arg;
+class_body_decl ::= MODIF MODIF TYPE:ret_type ID:name LP type_args:args RP block:block_desc 
+                    {:RESULT = ("declaring method  " + name + " returns " + ret_type + "\n" + args + "\n" + block_desc ); :}
+                    | MODIF MODIF TYPE:ret_type ID:name LP RP block
+                    {:RESULT = ("declaring method  " + name + " returns " + ret_type + "\n"); :}
+                    ; 
+
+
+type_arg ::= TYPE:type ID:name {:RESULT = "\t argument " + name +  " of type " + type + "\n";:};
+type_args ::= type_arg:desc {:RESULT = desc;:}
+            | type_args:desc1 COMMA type_arg:desc2 {:RESULT = desc1 + desc2;:};
 
 block ::= LC block_statements RC | LC RC;
 block_statement ::= semi_column_statement SM | if_block | while_block | for_block;
 block_statements ::= block_statement | block_statements block_statement;
 
-left_hand_side ::= TYPE AA ID | ID LS operation RS | TYPE ID | ID;
-semi_column_statement ::= left_hand_side AO expression | SYSOUT LP expression RP | SYSOUT LP RP | BREAK | RETURN expression; 
+left_hand_side ::= TYPE AA ID 
+                  | ID LS operation RS 
+                  | TYPE:type ID:name
+                  {: RESULT = "var " + name + " of type " + type;:}
+                  | ID;
+semi_column_statement ::= left_hand_side:left AO expression:val  {:RESULT = "assigning " + left + " to " ;:}
+                        | SYSOUT LP expression RP 
+                        | SYSOUT LP RP 
+                        | BREAK
+                        | RETURN expression; 
 
 if_block ::= IF LP expression RP block;
 while_block ::= WHILE LP expression RP block;
