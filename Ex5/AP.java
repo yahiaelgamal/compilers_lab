@@ -39,6 +39,7 @@ public class AP {
             writer.println(parser.desc);
             writer.close();
             System.out.println("Wrote file: description.txt");
+            System.out.println(parser.typesTable);
 
         } catch(Exception e) {
             e.printStackTrace();

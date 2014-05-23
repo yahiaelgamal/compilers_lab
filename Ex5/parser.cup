@@ -9,13 +9,124 @@ import java.util.*;
 
 parser code {:
     /* this part is included in the parser class */
+    /*import java.util.HashMap;*/
+
     static String desc = "";
+    static HashMap<String, String> typesTable = new HashMap<String, String>();
+
     public static void describe(String s){
-      desc = s + "\n" + desc;
-      /*desc += s + "\n";*/
+      desc = s;
     }
+
+    // only handles one operand
+    public static String getType(String operation){
+      if(isInt(operation))
+        return "int";
+
+      if(isDouble(operation))
+        return "double";
+
+      if(isChar(operation))
+        return "char";
+
+      if(isString(operation))
+        return "String";
+      
+      return "ID";
+    }
+
+    public static boolean isInt(String s){
+      try{
+        Integer.parseInt(s);
+        return true;
+      }catch(Exception e){
+        return false;
+      }
+    }
+
+    public static boolean isDouble(String s){
+      try{
+        Double.parseDouble(s);
+        return true;
+      }catch(Exception e){
+        return false;
+      }
+    }
+
+    public static boolean isChar(String s){
+      if(s.matches("'.'"))
+        return true;
+      else 
+        return false;
+    }
+
+    public static boolean isString(String s){
+      if(s.matches("\'\\w*\'"))
+        return true;
+      else 
+        return false;
+    }
+
+
+    public static String checkType(Object ID, Object newValue){
+      // the * isn't working for some reason
+      // handles only one operand
+      String w = " WARNING: ";
+      String e = " ERROR: ";
+      String oldType = typesTable.get(ID+"");
+      String newType = getType(newValue + "");
+
+      if(newType.equals("ID"))
+        newType = typesTable.get(newValue);
+        
+
+      if(oldType == null)
+        return e + " " + ID + " wasn't initialized before";
+
+      if(newType == null)
+        return e + " " + newValue + " wasn't initialized before";
+
+      if(!newType.equals(oldType))
+        return e + " Assigning " + newType + " to " + oldType;
+        
+      return "";
+      /*return "ID is " + ID  + "  new_type " + newType + "   old_type " + oldType + "  new_value" + newValue;*/
+    }
+
+    // Object because of some cup wierd thing
+    public static void addID(Object ID, Object type){
+      typesTable.put(ID + "", type + "");
+    }
+
+    public static String typeCastMsg(String operation, String newType){
+      String oldType = getType(operation);
+      String w = " WARNING: ";
+      if(oldType.equals(newType))
+        return w + "TYPE CASTING TO THE SAME TYPE";
+
+      String[] types = {"byte", "short", "char", "int", "long", "float", "double"};
+      int type1Ind = getIndex(oldType, types);
+      int type2Ind = getIndex(newType, types);
+
+      if(type1Ind > type2Ind)
+        return w + " possible loss of percision of converting " + oldType + " to " + newType;
+
+      return "";
+    }
+
     public static void main (String args[]) throws Exception{
-        new parser(new Lexer(System.in)).parse();
+      new parser(new Lexer(System.in)).parse();
+    }
+
+    public static int getIndex(Object s, Object[] ar){
+      int i = 0;
+      for(Object a : ar){
+        if(s.equals(a))
+          return i;
+
+        i++;
+      }
+      return -1;
     }
 :}
 
@@ -30,7 +141,8 @@ nonterminal String type_args, type_arg;
 nonterminal String block, block_statements, block_statement;
 
 nonterminal String semi_column_statement, if_block, while_block, for_block;
-nonterminal String left_hand_side, expression;
+nonterminal String expression;
+nonterminal String[] left_hand_side;
 nonterminal String type_cast, initiate, array;
 nonterminal String operation, operations, operator, atom, atoms;
 nonterminal String obj;
@@ -73,11 +185,21 @@ block_statement ::= semi_column_statement:desc SM  {:RESULT = desc;:}
 block_statements ::= block_statement:desc  {:RESULT = desc;:}
                 | block_statements:desc1 block_statement:desc2 {:RESULT = desc1 + "\n" + desc2 + "\n";:};
 
-left_hand_side ::= TYPE:type AA ID:name {:RESULT = "array of type " + type + " with name " + name ;:}
-                  | ID:name LS operation:op RS {:RESULT = "element " + op + " of array " + name;:}
-                  | TYPE:type ID:name {:RESULT = "initialization of variable " + name + " of type " + type;:}
-                  | ID:name {:RESULT = "varible " + name;:};
-semi_column_statement ::= left_hand_side:left AO expression:val  {:RESULT = "assigning " + left + " to (" + val + ")" ;:}
+left_hand_side ::= TYPE:type AA ID:name {:RESULT = new String[] {"array of type " + type + " with name " + name, name+""};:}
+                  | ID:name LS operation:op RS {:RESULT = new String[] {"element " + op + " of array " + name, name+""};:}
+                  | TYPE:type ID:name 
+                        {:
+                          RESULT = new String[] {"initialization of variable " + name + " of type " + type, name+""};
+                          parser.addID(name, type);
+                        :}
+                  | ID:name {:RESULT = new String[] {"varible " + name, name+""} ;:};
+
+semi_column_statement ::= left_hand_side:left AO expression:val  
+                                {:
+                                  RESULT = "assigning " + left[0] + " to (" + val + ")";
+                                  String warning = parser.checkType(left[1], val); 
+                                  RESULT += warning;
+                                :}
                         | SYSOUT LP expression:exp RP  {:RESULT = "printing (" + exp + ")";:}
                         | SYSOUT LP RP {:RESULT = "printing empty line";:}
                         | BREAK {:RESULT = "stop looping";:}
@@ -88,13 +210,19 @@ while_block ::= WHILE LP expression:exp RP block:bl_desc {:RESULT = "repeat whil
 for_block ::= FOR LP semi_column_statement:desc1 SM expression:desc2 SM expression:desc3 RP block:bl_desc 
             {:RESULT = "starting with " + desc1 + " with update of " + desc3 + " repeat while ( " + desc2 +  ") {\n" + bl_desc + "}" ;:};
 expression ::= type_cast:desc {:RESULT = desc;:}
-              | array:desc {:RESULT = desc;:}
-              | operations:desc {:RESULT = desc;:};
+           | array:desc {:RESULT = desc;:}
+           | operations:desc {:RESULT = desc;:};
 
-type_cast ::= LP TYPE:to_type RP operations:op {:RESULT = "typecasting (" + op + ") to " + to_type;:};
+type_cast ::= LP TYPE:to_type RP operations:op 
+                  {:
+                      RESULT = "typecasting (" + op + ") to " + to_type;
+                      RESULT += parser.typeCastMsg(op+"", to_type+"");
+                  :};
+
 array ::= LC atoms:desc RC  {:RESULT = "{" + desc + "}";:}
-        | LC RC {:RESULT = "empty array";:}
-        | NEW TYPE:type LS operations:op RS {:RESULT = "new array of type " + type + " and length " + op;:};
+           | LC RC {:RESULT = "empty array";:}
+           | NEW TYPE:type LS operations:op RS {:RESULT = "new array of type " + type + " and length " + op;:};
+
 operator ::= PO  {:RESULT = "+";:}
            | MO {:RESULT = "-";:}
            | MB {:RESULT = "*";:}
@@ -110,10 +238,12 @@ operator ::= PO  {:RESULT = "+";:}
 
 operation ::= atom:desc {:RESULT = desc;:} ;
 operations ::= operation:desc {:RESULT = desc;:}
-            | operations:desc1 operator:op operation:desc2 {:RESULT = desc1 + " " + op + " " + desc2;:}
-            | LP operations:desc RP {:RESULT = desc;:};
+        | operations:desc1 operator:op operation:desc2 {:RESULT = desc1 + " " + op + " " + desc2;:}
+        | LP operations:desc RP {:RESULT = desc;:};
 
-atoms ::= atoms:desc1 COMMA atom:desc2 {:RESULT = desc1 + "," + desc2;:} | atom:desc {:RESULT = desc;:};
+atoms ::= atoms:desc1 COMMA atom:desc2 {:RESULT = desc1 + "," + desc2;:} 
+        | atom:desc {:RESULT = desc;:};
+
 atom ::= MO obj:desc  {:RESULT = "-" + desc;:}
         | LN obj:desc {:RESULT = "!" + desc;:}
         | obj:desc {:RESULT = desc;:}
@@ -122,9 +252,9 @@ atom ::= MO obj:desc  {:RESULT = "-" + desc;:}
         | obj:desc LS expression:exp RS {:RESULT = "element " + exp + " of array " + desc;:};
 
 obj ::= ID:desc {:RESULT = desc+ "";:}
-| NM:desc {:RESULT = desc+"";:}
-| ST:desc {:RESULT = desc+"";:}
-| CH:desc {:RESULT = desc+"";:}
-| TRUE:desc {:RESULT = desc+"";:}
-| FALSE:desc {:RESULT = desc+"";:}
-| ID:desc1 DO ID:desc2 {:RESULT = desc1 + "." + desc2;:}; 
+        | NM:desc {:RESULT = desc+"";:}
+        | ST:desc {:RESULT = desc+"";:}
+        | CH:desc {:RESULT = desc+"";:}
+        | TRUE:desc {:RESULT = desc+"";:}
+        | FALSE:desc {:RESULT = desc+"";:}
+        | ID:desc1 DO ID:desc2 {:RESULT = desc1 + "." + desc2;:}; 

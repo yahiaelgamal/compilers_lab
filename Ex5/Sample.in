@@ -1,6 +1,11 @@
 class yahia {
   public static double coolMethod(int s, double y){
-    int x = 2;
+    int x = 4;
+    double y = 4.2;
+    x = y;
+    x = asdf;
+    String s = 2;
+    /*
     int y = (int) 2 + 2;
     if (x == 3){
       s =3;
@@ -40,6 +45,7 @@ class yahia {
     System.out.println();
     System.out.println( joe + yahia  + 'c' + "yahia");
     return TO[2];
+    */
   }
   public static double coolMethod2(String sasdfasdf, double y){}
   public static double coolMethod3(){}
