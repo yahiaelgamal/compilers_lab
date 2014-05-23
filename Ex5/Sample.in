@@ -5,6 +5,10 @@ class yahia {
     x = y;
     x = asdf;
     String s = 2;
+
+    short sh = 24;
+    int sh2 = sh;
+    short sh3 = sh2;
     /*
     int y = (int) 2 + 2;
     if (x == 3){

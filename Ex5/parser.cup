@@ -20,6 +20,12 @@ parser code {:
 
     // only handles one operand
     public static String getType(String operation){
+      if(isByte(operation))
+        return "byte";
+
+      if(isShort(operation))
+        return "short";
+
       if(isInt(operation))
         return "int";
 
@@ -34,6 +40,25 @@ parser code {:
       
       return "ID";
     }
+
+    public static boolean isByte(String s){
+      try{
+        Byte.parseByte(s);
+        return true;
+      }catch(Exception e){
+        return false;
+      }
+    }
+
+    public static boolean isShort(String s){
+      try{
+        Short.parseShort(s);
+        return true;
+      }catch(Exception e){
+        return false;
+      }
+    }
+
 
     public static boolean isInt(String s){
       try{
@@ -85,6 +110,13 @@ parser code {:
 
       if(newType == null)
         return e + " " + newValue + " wasn't initialized before";
+
+      String[] types = {"byte", "short", "char", "int", "long", "float", "double"};
+      int type1Ind = getIndex(oldType, types);
+      int type2Ind = getIndex(newType, types);
+
+      if(type1Ind >= type2Ind)
+        return  "";
 
       if(!newType.equals(oldType))
         return e + " Assigning " + newType + " to " + oldType;
