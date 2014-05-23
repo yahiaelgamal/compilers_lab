@@ -1,6 +1,8 @@
 
 import java_cup.runtime.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /*
  * Tutorial T8
  * 19-1023, Yahia El Gamal
@@ -9,36 +11,69 @@ import java.util.*;
 
 parser code {:
     /* this part is included in the parser class */
-    /*import java.util.HashMap;*/
 
     static String desc = "";
     static HashMap<String, String> typesTable = new HashMap<String, String>();
 
     public static void describe(String s){
-      desc = s;
+      desc = s + "\n" + desc;
     }
 
-    // only handles one operand
-    public static String getType(String operation){
-      if(isByte(operation))
+    public static String getWidestType(String[] operands){
+      String[] types = {"byte", "short", "char", "int", "long", "float", 
+                        "double", "String"};
+
+      int widestTypeIndex = 0;
+      for(String operand : operands){
+        String type = getType(operand);
+        if(type.equals("ID"))
+          type = typesTable.get(operand);
+
+        if(type == null)
+          return null;
+
+        int typeIndex = getIndex(type, types);
+        if(typeIndex > widestTypeIndex)
+          widestTypeIndex = typeIndex;
+      }
+
+      return types[widestTypeIndex];
+    }
+
+    public static String getType(String operand){
+      if(isByte(operand))
         return "byte";
 
-      if(isShort(operation))
+      if(isShort(operand))
         return "short";
 
-      if(isInt(operation))
+      if(isInt(operand))
         return "int";
 
-      if(isDouble(operation))
+      if(isDouble(operand))
         return "double";
 
-      if(isChar(operation))
+      if(isChar(operand))
         return "char";
 
-      if(isString(operation))
+      if(isString(operand))
         return "String";
+
       
       return "ID";
+    }
+    public static String getOperationType(String operation){
+
+      Pattern p = Pattern.compile("typecasting \\(.*\\) to (\\w*)\\s.*");
+      Matcher m = p.matcher(operation);
+
+      if(m.matches()){
+        return m.group(1).trim();
+      }
+
+      String[] operands = operation.split("\\s*[+*/]\\s*");
+      String widestType = getWidestType(operands);
+      return widestType;
     }
 
     public static boolean isByte(String s){
@@ -58,7 +93,6 @@ parser code {:
         return false;
       }
     }
-
 
     public static boolean isInt(String s){
       try{
@@ -86,7 +120,7 @@ parser code {:
     }
 
     public static boolean isString(String s){
-      if(s.matches("\'\\w*\'"))
+      if(s.matches("\"\\w*\""))
         return true;
       else 
         return false;
@@ -94,16 +128,10 @@ parser code {:
 
 
     public static String checkType(Object ID, Object newValue){
-      // the * isn't working for some reason
-      // handles only one operand
       String w = " WARNING: ";
       String e = " ERROR: ";
       String oldType = typesTable.get(ID+"");
-      String newType = getType(newValue + "");
-
-      if(newType.equals("ID"))
-        newType = typesTable.get(newValue);
-        
+      String newType = getOperationType(newValue + "");
 
       if(oldType == null)
         return e + " " + ID + " wasn't initialized before";
@@ -111,18 +139,20 @@ parser code {:
       if(newType == null)
         return e + " " + newValue + " wasn't initialized before";
 
-      String[] types = {"byte", "short", "char", "int", "long", "float", "double"};
+      String[] types = {"byte", "short", "char", "int", "long", "float",
+                        "double", "String"};
+
       int type1Ind = getIndex(oldType, types);
       int type2Ind = getIndex(newType, types);
 
-      if(type1Ind >= type2Ind)
-        return  "";
+      if(type1Ind < type2Ind)
+        return e + " assigning " + newType + " to " + oldType;
 
       if(!newType.equals(oldType))
-        return e + " Assigning " + newType + " to " + oldType;
+        return w + " assigning " + newType + " to " + oldType;
         
+      /*return e + e + "oldType " + oldType + type1Ind + " newType " + newType + type2Ind;*/
       return "";
-      /*return "ID is " + ID  + "  new_type " + newType + "   old_type " + oldType + "  new_value" + newValue;*/
     }
 
     // Object because of some cup wierd thing
@@ -131,14 +161,18 @@ parser code {:
     }
 
     public static String typeCastMsg(String operation, String newType){
-      String oldType = getType(operation);
+      String oldType = getOperationType(operation);
       String w = " WARNING: ";
+      String e = " ERROR: ";
       if(oldType.equals(newType))
         return w + "TYPE CASTING TO THE SAME TYPE";
 
-      String[] types = {"byte", "short", "char", "int", "long", "float", "double"};
+      String[] types = {"byte", "short", "char", "int", "long", "float", "double", "String"};
       int type1Ind = getIndex(oldType, types);
       int type2Ind = getIndex(newType, types);
+
+      if(oldType.equals("String"))
+        return e + "Cannot typecast String to " + newType;
 
       if(type1Ind > type2Ind)
         return w + " possible loss of percision of converting " + oldType + " to " + newType;
@@ -196,9 +230,15 @@ class_body_decls ::= class_body_decl:desc {:RESULT = desc + "\n";:}
               | class_body_decls:desc1 class_body_decl:desc2 {:RESULT = desc1 + "\n" + desc2 + "\n";:};
 
 class_body_decl ::= MODIF MODIF TYPE:ret_type ID:name LP type_args:args RP block:block_desc 
-                    {:RESULT = ("declaring method  " + name + " returns " + ret_type + "\n" + args + "{\n" + block_desc + "}" ); :}
+                    {:
+                      RESULT = ("declaring method  " + name + " returns " + ret_type + "\n" + args + "{\n" + block_desc + "}" );
+                      parser.typesTable.clear();
+                    :}
                     | MODIF MODIF TYPE:ret_type ID:name LP RP block:block_desc
-                    {:RESULT = ("declaring method  " + name + " returns " + ret_type + "{\n" + block_desc + "}" ); :}
+                    {:
+                      RESULT = ("declaring method  " + name + " returns " + ret_type + "{\n" + block_desc + "}" ); 
+                      parser.typesTable.clear();
+                    :}
                     ; 
 
 
