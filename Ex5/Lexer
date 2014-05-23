@@ -26,9 +26,9 @@ import java_cup.runtime.Symbol;
 %state STRING
 
 MODIF = public|private|protected|static
-TYPE = int|double|boolean|long|short|String|void|byte|char
+TYPE = int|double|boolean|long|short|String|void|byte|char|float
  
-KEYWORD=String|System|boolean|break|byte|char|class|double|false|for|if|int|long|new|out|println|public|return|short|static|true|void|while
+KEYWORD=String|System|boolean|break|byte|char|class|double|float|false|for|if|int|long|new|out|println|public|return|short|static|true|void|while
 
 ALPHA=[A-Za-z_]
 DIGIT=[0-9]

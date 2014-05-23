@@ -145,11 +145,15 @@ parser code {:
       int type1Ind = getIndex(oldType, types);
       int type2Ind = getIndex(newType, types);
 
+      // obvious widening violations 
       if(type1Ind < type2Ind)
         return e + " assigning " + newType + " to " + oldType;
+      
+      // Special cases
+      if((oldType.equals("String") && !newType.equals("String")) || 
+         (oldType.equals("float") && !newType.equals("float")) )
+        return e + " cannot convert type " + newType + " to " + oldType;
 
-      if(!newType.equals(oldType))
-        return w + " assigning " + newType + " to " + oldType;
         
       /*return e + e + "oldType " + oldType + type1Ind + " newType " + newType + type2Ind;*/
       return "";
@@ -231,6 +235,7 @@ class_body_decls ::= class_body_decl:desc {:RESULT = desc + "\n";:}
 
 class_body_decl ::= MODIF MODIF TYPE:ret_type ID:name LP type_args:args RP block:block_desc 
                     {:
+                      // This is an easy way to handle method scopes, not for-loop scopes though
                       RESULT = ("declaring method  " + name + " returns " + ret_type + "\n" + args + "{\n" + block_desc + "}" );
                       parser.typesTable.clear();
                     :}
@@ -262,6 +267,9 @@ left_hand_side ::= TYPE:type AA ID:name {:RESULT = new String[] {"array of type 
                   | TYPE:type ID:name 
                         {:
                           RESULT = new String[] {"initialization of variable " + name + " of type " + type, name+""};
+                          if(parser.typesTable.containsKey(name)){
+                            RESULT[0] += "\n(FATAL ERROR : " + name + " was defined before)\n";
+                          }
                           parser.addID(name, type);
                         :}
                   | ID:name {:RESULT = new String[] {"varible " + name, name+""} ;:};
